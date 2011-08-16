@@ -88,6 +88,7 @@ DM.prototype.task = function(name, detect) {
 /**
  * Mark a task as finished.
  * This might trigger a reschedule.
+ * @param name - name of task
  */
 DM.prototype.markDone = function(name) {
 	// check for finished dependencies

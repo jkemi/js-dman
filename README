@@ -1,0 +1,11 @@
+DMan is a Javascript dependency manager.
+Should be compatible with all modern browsers (and probably ie6 as well)
+
+DMan is built in two configurations
+ release/dman-min.js minimized release build (1.3 kb, 0.6 kb gzip)
+ debug/dman-dbg.js full debug build (use for development)
+
+ dman can be catenated into existing .js-files to reduce network requests.
+
+Build instructions (with GNU make):
+ make -f Makefile

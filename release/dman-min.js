@@ -1,3 +1,8 @@
+/**
+ * DMan - Javascript dependency manager.
+ * Copyright (C) 2011 Jakob Kemi <jakob.kemi@gmail.com>
+ * Code licensed under the BSD License, see COPYING.
+ */
 function DM(){this.fin={};this.pen={};this.wai=[];this.tim=null}DM.prototype.onDone=function(c,e,b){var a=true;
 for(var d=0;a&&d<e.length;d++){if(!this.fin[e[d]]){a=false}}if(a){b()}else{this.wai.push([e,b]);if(!this.timer){this.chk()
 }}};DM.prototype.task=function(b,a){this.pen[b]=a};DM.prototype.markDone=function(a){if(a in this.pen){delete this.pen[a];

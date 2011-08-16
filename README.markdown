@@ -64,7 +64,9 @@ Build dependencies:
  * cpp (c preprocessor)
  * GNU Make
  * yui-compressor
+ * markdown (for make target 'doc')
 
 Build instructions (using GNU make):
 
  * make -f Makefile
+ * make -f Makefile doc (for README.html)

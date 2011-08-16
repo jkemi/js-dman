@@ -1,6 +1,7 @@
 /**
- * Javascript dependency manager.
+ * DMan - Javascript dependency manager.
  * Copyright (C) 2011 Jakob Kemi <jakob.kemi@gmail.com>
+ * Code licensed under the BSD License, see COPYING.
  */
 function DM() {
 	// queues for waiting for jQuery

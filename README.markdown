@@ -2,18 +2,27 @@ DMan - a Javascript dependency manager
 ======================================
 
 Purpose:
+--------
  DMan handles asynchronous dependencies for javascript projects.
- Typical usage might be to create a function that depends on one or more javascript files to
+ Typical usage might be to create a function (action) that depends on one or more javascript files to
  be loaded into browser and perhaps some additional data to arrive before execution.
  DMan handles this by internally building a small dependency chain that propagates and executes
- the defined steps as soon as dependencies gets fulfilled.
+ the defined actions as soon as dependencies gets fulfilled.
  A dependency is fulfilled either by:
 
   * explicit marking (via markDone() )
   * script is loaded (via onDoneJS() )
   * polling (automatically if required and poll function is supplied)
 
+Usage:
+------
+ Include release/dman-min.js in your html, head-section.
+ Or catenate into top of your .js-files to reduce network requests.
+ For examples see: examples/example.js.
+
+
 API:
+----
 
  * task(name, detect) - add task that we can add dependencies to.
 
@@ -39,17 +48,16 @@ API:
 
 
 Compatiblity:
+-------------
  Should be compatible with all modern browsers (and probably ie6 as well)
 
-Build
------
+Build instructions:
+-------------------
 
 DMan is built in two configurations
  release/dman-min.js minimized release build (1.3 kb, 0.6 kb gzip)
  debug/dman-dbg.js full debug build (use for development)
 
-Usage:
- dman can be catenated into existing .js-files to reduce network requests.
 
 Build dependencies:
 

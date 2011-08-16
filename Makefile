@@ -2,9 +2,14 @@
 
 all : release/dman-min.js debug/dman-dbg.js release/dman-min.js.gz
 
+docs: README.html
+
+%.html : %.markdown
+	markdown $< > $@
+
 .PHONY: clean
 clean :
-	rm release/*-min.* debug/*-dbg.*
+	rm release/*-min.* debug/*-dbg.* README.html
 
 release/%-rel.js : %.js Makefile
 	cpp -undef -P -C -DNDEBUG -UDEBUG ${DEFINES} -o $@ $<

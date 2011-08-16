@@ -1,5 +1,5 @@
 //
-// Place verbatim copy of dman-min.js at top of example.js include it via html
+// Place verbatim copy of dman-min.js at top of example.js or include it via html (head section)
 //
 
 // Create dependency object

@@ -20,7 +20,7 @@ dep.task('doc', null);
 
 // Create an action, that is finished when document is loaded
 dep.onDone(
-	'docready'		// debug name of action
+	'docready',		// debug name of action
 	['jq'],			// we use $(document).ready, so this task depends on jquery('jq')
 	function(){		// function simply marks task 'doc' as finished when executed.
 		$(document).ready(function(){dep.markDone('doc');});

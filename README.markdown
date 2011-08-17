@@ -49,7 +49,7 @@ API:
 
 Compatiblity:
 -------------
- Should be compatible with all modern browsers (and probably ie6 as well)
+ Should be compatible with all popular browsers (tested and working in ie6 as well)
 
 Build instructions:
 -------------------

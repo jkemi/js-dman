@@ -155,6 +155,35 @@ DM.prototype.onDoneJS = function(name, deps, url, detect) {
 	}
 };
 
+/**
+ * Enqueue a future async load of css that will be started immediately
+ * @param name - name of task
+ * @param url - url of external script to load
+ */
+// FIXME: needs polling to check when loaded
+DM.prototype.taskCSS = function(name, url) {
+#ifdef DEBUG
+	console.log("async. loading css " + name);
+#endif
+	var that=this;
+	this.onDone(name, [], function(){
+		if (!(that.fin[name] || that.pen[name])) {
+			that.task(name, null);
+			var link = document.createElement('link');
+			link.href = url;
+			link.type = "text/css";
+			link.rel = "stylesheet";
+			document.getElementsByTagName('head')[0].appendChild(link);
+			that.markDone(name);
+		}
+#ifdef DEBUG
+			else {
+				console.log("css-load task with name '" + name + "' is already finished or pending, ignoring");
+			}
+#endif
+	});
+};
+
 
 /**
  * Interal schedule function

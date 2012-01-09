@@ -123,17 +123,34 @@ DM.prototype.onDoneJS = function(name, deps, url, detect) {
 	} else {
 
 #ifdef DEBUG
-		console.log("async. loading " + name);
+		console.log("async. loading js " + name);
 #endif
 		var that=this;
 		this.onDone(name, deps, function(){
-			that.task(name, null);
-			var script = document.createElement('script');
-			script.src = url;
-			script.type = "text/javascript";
-			script.onreadystatechange=function(){if(this.readyState=='complete') that.markDone(name);};
-			script.onload=function(){that.markDone(name);};
-			document.getElementsByTagName('head')[0].appendChild(script);
+			if (!(that.fin[name] || that.pen[name])) {
+				that.task(name, null);
+				var script = document.createElement('script');
+				script.src = url;
+				script.type = "text/javascript";
+				if (script.onreadystatechange!==undefined) {
+					script.onreadystatechange=function(){
+						if(this.readyState=='complete' || this.readyState=='loaded') {
+// FIXME: rumoured ie mem leak
+//							this.onload = this.onreadystatechange = null;
+//							document.getElementsByTagName('head')[0].removeChild(this);
+							that.markDone(name);
+						};
+					};
+				}
+//				script.onload=function() {this.onload=null; that.markDone(name); };
+				script.onload=function() { that.markDone(name); };
+				document.getElementsByTagName('head')[0].appendChild(script);
+			}
+#ifdef DEBUG
+			else {
+				console.log("js-load task with name '" + name + "' is already finished or pending, ignoring");
+			}
+#endif
 		});
 	}
 };

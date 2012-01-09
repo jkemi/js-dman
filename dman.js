@@ -4,9 +4,9 @@
  * Code licensed under the BSD License, see COPYING.
  */
 function DM() {
-	// queues for waiting for jQuery
-	this.fin	= {};	// name -> true
-	this.pen	= {};	// name -> detect
+	// queues
+	this.fin	= {};	// name -> true		finished actions
+	this.pen	= {};	// name -> detect	ongoing actions
 #ifdef DEBUG
 	this.wai	= [];	// [[dep],callback,name]
 #else
@@ -42,7 +42,7 @@ DM.prototype.debug = function() {
 					deps.push(this.wai[i][0][j]);
 				}
 			}
-			console.log("- waiting with deps: " + deps.join(",") + " name: " + this.wai[i][2]);
+			console.log("- waiting with deps: " + deps.join(",") + " ;name: " + this.wai[i][2]);
 		}
 }
 #endif
@@ -89,7 +89,7 @@ DM.prototype.task = function(name, detect) {
 /**
  * Mark a task as finished.
  * This might trigger a reschedule.
- * @param name - name of task
+ * @param name - name of task to mark as finished
  */
 DM.prototype.markDone = function(name) {
 	// check for finished dependencies
@@ -114,6 +114,7 @@ DM.prototype.markDone = function(name) {
  * @param detect - a callback returning true once the task is finished (may be null if markDone() is used)
  */
 DM.prototype.onDoneJS = function(name, deps, url, detect) {
+
 	if ((detect != null) && detect()) {
 #ifdef DEBUG
 		console.log("detect found " + name + ", not loading script");

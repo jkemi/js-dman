@@ -46,6 +46,10 @@ API:
 	- url - url to javascript to load
 	- detect - function that can detect if script is already loaded
 
+ * taskCSS(name, url) - load css immediately (note, detection of css download completion not implemented)
+
+	- name - name of task
+	- url - url of external script to load
 
 Compatiblity:
 -------------

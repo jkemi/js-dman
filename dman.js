@@ -115,9 +115,9 @@ DM.prototype.markDone = function(name) {
  */
 DM.prototype.onDoneJS = function(name, deps, url, detect) {
 
-	if ((detect != null) && detect()) {
+	if ( this.fin[name] || (detect != null && detect()) ) {
 #ifdef DEBUG
-		console.log("detect found " + name + ", not loading script");
+		console.log("task finished or detect() found " + name + ", not loading script");
 #endif
 		this.fin[name] = true;
 	} else {

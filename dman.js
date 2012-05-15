@@ -1,6 +1,6 @@
 /**
  * DMan - Javascript dependency manager.
- * Copyright (C) 2011 Jakob Kemi <jakob.kemi@gmail.com>
+ * Copyright (C) 2011-2012 Jakob Kemi <jakob.kemi@gmail.com>
  * Code licensed under the BSD License, see COPYING.
  */
 function DM() {
@@ -127,8 +127,11 @@ DM.prototype.onDoneJS = function(name, deps, url, detect) {
 #endif
 		var that=this;
 		this.onDone(name, deps, function(){
-			if (!(that.fin[name] || that.pen[name])) {
-				that.task(name, null);
+			if ( !(name in that.pen) ) {
+#ifdef DEBUG
+				console.log("js-load task with name '" + name + "' is not finished or pending, do actual load");
+#endif
+				that.task(name, detect);
 				var script = document.createElement('script');
 				script.src = url;
 				script.type = "text/javascript";
@@ -167,7 +170,7 @@ DM.prototype.taskCSS = function(name, url) {
 #endif
 	var that=this;
 	this.onDone(name, [], function(){
-		if (!(that.fin[name] || that.pen[name])) {
+		if (!(that.fin[name] || name in that.pen)) {
 			that.task(name, null);
 			var link = document.createElement('link');
 			link.href = url;
@@ -202,9 +205,9 @@ DM.prototype.chk = function(){
 	for (var name in this.pen) {
 		if (this.pen[name] != null) {
 			var res = this.pen[name]();
-	#ifdef DEBUG
+#ifdef DEBUG
 			console.log("checking " + name + " res: " + res);
-	#endif
+#endif
 			if (res) {
 				delete this.pen[name];
 				this.fin[name] = true;

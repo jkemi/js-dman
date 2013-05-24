@@ -1,26 +1,37 @@
+declare var RELEASE:bool;
+
 /**
+ * @license
  * DMan - Javascript dependency manager.
- * Copyright (C) 2011-2012 Jakob Kemi <jakob.kemi@gmail.com>
+ * Copyright (C) 2011-2013 Jakob Kemi <jakob.kemi@gmail.com>
  * Code licensed under the BSD License, see COPYING.
  */
-function DM() {
-	// queues
-	this.fin	= {};	// name -> true		finished actions
-	this.pen	= {};	// name -> detect	ongoing actions
-#ifdef DEBUG
-	this.wai	= [];	// [[dep],callback,name]
-#else
-	this.wai	= [];	// [[dep],callback]
-#endif
+class DM {
 
-	this.tim=null;
-#ifdef DEBUG
-	this.count=0;
-#endif
-};
+	private fin : {[id:string] : bool; };
+	private pen : {[id:string] : ()=>bool; };
+	private wai : any[][];
+	private tim : number;	// timer object
+	private count : number;
 
-#ifdef DEBUG
-DM.prototype.debug = function() {
+	constructor () {
+		// queues
+		this.fin	= {};	// name -> true		finished actions
+		this.pen	= {};	// name -> detect	ongoing actions
+		this.tim=null;
+
+
+if (!RELEASE) {
+		this.wai	= [];	// [[dep],callback,name]
+		this.count=0;
+} else {
+		this.wai	= [];	// [[dep],callback]
+}
+	}
+
+
+	debug() {
+if (!RELEASE) {
 		var fini=[];
 		for (var k in this.fin) {
 			fini.push(k);
@@ -45,7 +56,9 @@ DM.prototype.debug = function() {
 			console.log("- waiting with deps: " + deps.join(",") + " ;name: " + this.wai[i][2]);
 		}
 }
-#endif
+	}
+
+
 
 /**
  * Enqueue a future callback that will be run once all deps are fullfilled.
@@ -53,7 +66,7 @@ DM.prototype.debug = function() {
  * @param deps - an array of strings containing dependencies needed
  * @param cb - callback to run
  */
-DM.prototype.onDone = function(name, deps, cb) {
+onDone (name:string, deps:string[], cb:()=>any) {
 	var alldeps=true;
 	for (var i=0; alldeps && i<deps.length; i++) {
 		if (!this.fin[deps[i]]) {
@@ -61,50 +74,49 @@ DM.prototype.onDone = function(name, deps, cb) {
 		}
 	}
 	if (alldeps) {
-#ifdef DEBUG
+if (!RELEASE) {
 		console.log("immediate " + name);
-#endif
+}
 		// Perform immediately if all deps are fullfilled
 		cb();
 	} else {
-#ifdef DEBUG
+if (!RELEASE) {
 		console.log("delayed " + name);
 		this.wai.push( [deps,cb,name]);
-#else
+} else {
 		this.wai.push( [deps,cb]);
-#endif
-		if (!this.timer) this.chk();
+}
+		if (!this.tim) this.chk();
 	}
-};
+}
 
 /**
  * Registers a task by name and a method to detect when it's finished
  * @param name - name of task (that other tasks can depend on)
  * @param detect - a callback returning true once the task is finished (may be null if markDone() is used)
  */
-DM.prototype.task = function(name, detect) {
+task (name:string, detect:()=>bool) {
 	this.pen[name] = detect;
-};
+}
 
 /**
  * Mark a task as finished.
  * This might trigger a reschedule.
  * @param name - name of task to mark as finished
  */
-DM.prototype.markDone = function(name) {
+markDone (name:string) {
 	// check for finished dependencies
 	if (name in this.pen) {
-#ifdef DEBUG
+if (!RELEASE) {
 		console.log("explicit finish of " + name + " recheck");
-#endif
+}
 		delete this.pen[name];
 		this.fin[name] = true;
 		this.chk();
 	} else {
 		this.fin[name] = true;
 	}
-
-};
+}
 
 /**
  * Enqueue a future async load of js that will be run once all deps are fullfilled.
@@ -113,26 +125,26 @@ DM.prototype.markDone = function(name) {
  * @param url - url of external script to load
  * @param detect - a callback returning true once the task is finished (may be null if markDone() is used)
  */
-DM.prototype.onDoneJS = function(name, deps, url, detect) {
+onDoneJS (name:string, deps:string[], url:string, detect:()=>bool) {
 
 	if ( this.fin[name] || (detect != null && detect()) ) {
-#ifdef DEBUG
+if (!RELEASE) {
 		console.log("task finished or detect() found " + name + ", not loading script");
-#endif
+}
 		this.fin[name] = true;
 	} else {
 
-#ifdef DEBUG
+if (!RELEASE) {
 		console.log("async. loading js " + name);
-#endif
+}
 		var that=this;
 		this.onDone(name, deps, function(){
 			if ( !(name in that.pen) ) {
-#ifdef DEBUG
+if (!RELEASE) {
 				console.log("js-load task with name '" + name + "' is not finished or pending, do actual load");
-#endif
+}
 				that.task(name, detect);
-				var script = document.createElement('script');
+				var script = <HTMLScriptElement>document.createElement('script');
 				script.src = url;
 				script.type = "text/javascript";
 				if (script.onreadystatechange!==undefined) {
@@ -148,15 +160,12 @@ DM.prototype.onDoneJS = function(name, deps, url, detect) {
 //				script.onload=function() {this.onload=null; that.markDone(name); };
 				script.onload=function() { that.markDone(name); };
 				document.getElementsByTagName('head')[0].appendChild(script);
-			}
-#ifdef DEBUG
-			else {
+			} else if (!RELEASE) {
 				console.log("js-load task with name '" + name + "' is already finished or pending, ignoring");
 			}
-#endif
 		});
 	}
-};
+}
 
 /**
  * Enqueue a future async load of css that will be started immediately
@@ -164,40 +173,36 @@ DM.prototype.onDoneJS = function(name, deps, url, detect) {
  * @param url - url of external script to load
  */
 // FIXME: needs polling to check when loaded
-DM.prototype.taskCSS = function(name, url) {
-#ifdef DEBUG
+taskCSS (name:string, url:string) {
+if (!RELEASE) {
 	console.log("async. loading css " + name);
-#endif
+}
 	var that=this;
 	this.onDone(name, [], function(){
 		if (!(that.fin[name] || name in that.pen)) {
 			that.task(name, null);
-			var link = document.createElement('link');
+			var link = <HTMLLinkElement>document.createElement('link');
 			link.href = url;
 			link.type = "text/css";
 			link.rel = "stylesheet";
 			document.getElementsByTagName('head')[0].appendChild(link);
 			that.markDone(name);
-		}
-#ifdef DEBUG
-			else {
+		} else if (!RELEASE) {
 				console.log("css-load task with name '" + name + "' is already finished or pending, ignoring");
-			}
-#endif
+		}
 	});
-};
-
+}
 
 /**
  * Interal schedule function
  */
-DM.prototype.chk = function(){
+private chk () {
 
-#ifdef DEBUG
+if (!RELEASE) {
 	console.log("-- count is "+ this.count + " --");
 	this.count++;
 	this.debug();
-#endif
+}
 
 	var resched=false;
 
@@ -205,9 +210,9 @@ DM.prototype.chk = function(){
 	for (var name in this.pen) {
 		if (this.pen[name] != null) {
 			var res = this.pen[name]();
-#ifdef DEBUG
+if (!RELEASE) {
 			console.log("checking " + name + " res: " + res);
-#endif
+}
 			if (res) {
 				delete this.pen[name];
 				this.fin[name] = true;
@@ -235,10 +240,10 @@ DM.prototype.chk = function(){
 
 		if (alldeps) {
 			var cb = wait[1];
-#ifdef DEBUG
+if (!RELEASE) {
 			var name = wait[2];
 			console.log("performing " + name);
-#endif
+}
 			cb();
 		} else {
 			newwait.push(wait);
@@ -251,9 +256,9 @@ DM.prototype.chk = function(){
 	// Schedule new run if needed
 	if (resched) {
 		if (!this.tim) {
-#ifdef DEBUG
+if (!RELEASE) {
 			console.log("sched started");
-#endif
+}
 			var that=this;
 			this.tim = setInterval( function(){that.chk();}, 15 );
 		}
@@ -262,9 +267,9 @@ DM.prototype.chk = function(){
 	if (this.tim) {
 		clearInterval(this.tim);
 		this.tim=null;
-#ifdef DEBUG
+if (!RELEASE) {
 		console.log("sched stopped");
-#endif
+}
 	}
-};
+}
 

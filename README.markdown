@@ -59,15 +59,15 @@ Build instructions:
 -------------------
 
 DMan is built in two configurations
- release/dman-min.js minimized release build (1.3 kb, 0.6 kb gzip)
- debug/dman-dbg.js full debug build (use for development)
+ release/dman.min.js minimized release build (1.3 kb, 0.6 kb gzip)
+ debug/dman.js full debug build (use for development)
 
 
 Build dependencies:
 
- * cpp (c preprocessor)
+ * typescript (>= 0.8.3)
  * GNU Make
- * yui-compressor
+ * uglifyjs (>= 2.0)
  * markdown (for make target 'doc')
 
 Build instructions (using GNU make):

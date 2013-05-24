@@ -1,25 +1,33 @@
 .SUFFIXES:
 
-all : release/dman.min.js debug/dman-dbg.js release/dman.min.js.gz
+TSC=~/node_modules/.bin/tsc
+UJS=~/node_modules/.bin/uglifyjs
+
+all : release/dman.min.js release/dman.d.ts debug/dman.js release/dman.min.js.gz
 
 doc: README.html
 
 %.html : %.markdown
-	markdown $< > $@
+	@printf "[DOC] %-20s <- %s\n" $@ $<
+	@markdown $< > $@
 
 .PHONY: clean
 clean :
-	rm release/*.min.* debug/*-dbg.* README.html
+	@echo "[CLEAN]"
+	@rm release/*.min.* release/*.d.ts debug/* README.html 2>/dev/null || true
 
-release/%-rel.js : %.js
-	cpp -undef -P -C -DNDEBUG -UDEBUG ${DEFINES} -o $@ $<
+debug/%.js debug/%.d.ts: %.ts
+	@printf  "[TSC]  %-20s <- %s\n" $@ $<
+	@$(TSC) --comments --declaration --out $@ $<
 
-debug/%-dbg.js : %.js
-	cpp -undef -P -C -DDEBUG -UNDEBUG ${DEFINES} -o $@ $<
+release/%.min.js : debug/%.js
+	@printf  "[TSC]  %-20s <- %s\n" $@ $<
+	@$(UJS) --comments -c -m -d RELEASE=true -o $@ $<
 
-%.min.js : %-rel.js
-	head -n 5 $< > $@
-	yui-compressor --type js --charset UTF-8 --line-break 100 $< >> $@
+release/%.d.ts : debug/%.d.ts
+	@printf "[CP]   %-20s <- %s\n" $@ $<
+	@cp $< $@
 
 %.min.js.gz : %.min.js
-	gzip -9 <$< >$@
+	@printf "[GZIP] %-20s <- %s\n" $@ $<
+	@gzip -9 <$< >$@

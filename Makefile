@@ -18,7 +18,7 @@ clean :
 
 debug/%.js debug/%.d.ts: %.ts
 	@printf  "[TSC]  %-20s <- %s\n" $@ $<
-	@$(TSC) --comments --declaration --out $@ $<
+	@$(TSC) --declaration --out $@ $<
 
 release/%.min.js : debug/%.js
 	@printf  "[TSC]  %-20s <- %s\n" $@ $<
@@ -26,7 +26,7 @@ release/%.min.js : debug/%.js
 
 release/%.d.ts : debug/%.d.ts
 	@printf "[CP]   %-20s <- %s\n" $@ $<
-	@cp $< $@
+	@grep -v "^declare var RELEASE" $< > $@
 
 %.min.js.gz : %.min.js
 	@printf "[GZIP] %-20s <- %s\n" $@ $<

@@ -1,3 +1,4 @@
 README.html
 *.gz
 debug/
+node_modules/

@@ -1,0 +1,9 @@
+{
+  "name": "dman",
+  "description": "JS dependency manager",
+  "author": "Jakob Kemi <jakob.kemi@gmail.com>",
+  "dependencies": {
+    "typescript": "^1.7.5",
+    "uglify-js": "^2.6.1"
+  }
+}

@@ -4,6 +4,17 @@
  * Copyright (C) 2011-2016 Jakob Kemi <jakob.kemi@gmail.com>
  * Code licensed under the BSD License, see COPYING.
  */
+/**
+ * Internal wait entry
+ */
+interface DMItem {
+    d: string[];
+    c: () => boolean;
+    n?: string;
+}
+/**
+ * Dependency manager
+ */
 declare class DM {
     private fin;
     private pen;
@@ -11,7 +22,7 @@ declare class DM {
     private tim;
     private count;
     constructor();
-    private debug();
+    debug(): void;
     /**
      * Enqueue a future callback that will be run once all deps are fulfilled.
      * @param name - debug name for task

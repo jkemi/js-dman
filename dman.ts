@@ -1,16 +1,29 @@
-declare var RELEASE:boolean;
-
 /**
  * @license
  * DMan - Javascript dependency manager.
  * Copyright (C) 2011-2016 Jakob Kemi <jakob.kemi@gmail.com>
  * Code licensed under the BSD License, see COPYING.
  */
+
+declare var RELEASE:boolean;
+
+/**
+ * Internal wait entry
+ */
+interface DMItem {
+	d:string[];
+	c:()=>boolean;
+	n?:string;
+}
+
+/**
+ * Dependency manager
+ */
 class DM {
 
-	private fin:{[id:string] : boolean; };
-	private pen:{[id:string] : ()=>boolean; };
-	private wai:any[][];
+	private fin:{[id:string] : boolean; };		// map of ids marked as finished
+	private pen:{[id:string] : ()=>boolean; };	// map of ids still awaiting termination
+	private wai:DMItem[];						// stack of wait entries
 	private tim:number;	// timer object
 	private count:number;
 
@@ -48,12 +61,12 @@ class DM {
 
 			for (var i = 0; i < this.wai.length; i++) {
 				var deps = [];
-				for (var j = 0; j < this.wai[i][0].length; j++) {
-					if (!(this.wai[i][0][j] in this.fin)) {
-						deps.push(this.wai[i][0][j]);
+				for (var j = 0; j < this.wai[i].d.length; j++) {
+					if (!(this.wai[i].d[j] in this.fin)) {
+						deps.push(this.wai[i].d[j]);
 					}
 				}
-				console.log("- waiting with deps: " + deps.join(",") + " ;name: " + this.wai[i][2]);
+				console.log("- waiting with deps: " + deps.join(",") + " ;name: " + this.wai[i].n);
 			}
 		}
 	}
@@ -81,9 +94,9 @@ class DM {
 		} else {
 			if (!RELEASE) {
 				console.log("delayed " + name);
-				this.wai.push([deps, cb, name]);
+				this.wai.push({d:deps, c:cb, n:name});
 			} else {
-				this.wai.push([deps, cb]);
+				this.wai.push({d:deps, c:cb});
 			}
 			if (!this.tim) this.chk();
 		}
@@ -210,7 +223,7 @@ class DM {
 
 		// check for finished dependencies
 		for (var name in this.pen) {
-			if (this.pen[name] != null) {
+			if (this.pen[name] !== null) {
 				var res = this.pen[name]();
 				if (!RELEASE) {
 					console.log("checking " + name + " res: " + res);
@@ -221,17 +234,19 @@ class DM {
 				} else {
 					resched = true;
 				}
+			} else {
+				resched = true;
 			}
 		}
 
 		// remove finished dependencies from targets
 		// run any callbacks without dependencies
-		var newwait = [];
-		var wait;
+		var newwait:DMItem[] = [];
+		var wait:DMItem;
 		while (wait = this.wai.pop()) {
 			var alldeps = true;
 
-			var deps = wait[0];
+			var deps:string[] = wait.d;
 
 			for (var j = 0; alldeps && j < deps.length; j++) {
 				var dep = deps[j];
@@ -241,12 +256,10 @@ class DM {
 			}
 
 			if (alldeps) {
-				var cb = wait[1];
 				if (!RELEASE) {
-					var name = wait[2];
-					console.log("performing " + name);
+					console.log("performing " + wait.n);
 				}
-				cb();
+				wait.c();
 			} else {
 				newwait.push(wait);
 			}

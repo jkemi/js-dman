@@ -1,7 +1,8 @@
 .SUFFIXES:
 
-TSC=~/node_modules/.bin/tsc
-UJS=~/node_modules/.bin/uglifyjs
+NPMBIN=./node_modules/.bin
+TSC=$(NPMBIN)/tsc
+UJS=$(NPMBIN)/uglifyjs
 
 all : release/dman.min.js release/dman.d.ts debug/dman.js release/dman.min.js.gz
 
